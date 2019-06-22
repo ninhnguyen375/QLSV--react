@@ -1,15 +1,24 @@
-// import { hot } from 'react-hot-loader/root';
 import React from 'react';
-import { Button, message } from 'antd';
+import { BrowserRouter, Switch, Route } from 'react-router-dom';
+import Axios from 'axios';
+import Student from './views/Student';
+import Report from './views/Report';
+import ClassView from './views/ClassView';
+import ImportFromExcel from './views/ImportFromExcel';
+
+Axios.defaults.baseURL = 'http://localhost:3001';
 
 function App() {
   return (
-    <div className="App">
-      {message.success('Welcome to ant design + reactjs')}
-      <Button type="primary">Button of Antd</Button>
-    </div>
+    <BrowserRouter>
+      <Switch>
+        <Route exact path="/" component={Student} />
+        <Route exact path="/classview" component={ClassView} />
+        <Route exact path="/report" component={Report} />
+        <Route exact path="/importfromexcel" component={ImportFromExcel} />
+      </Switch>
+    </BrowserRouter>
   );
 }
 
 export default App;
-// export default hot(App);
