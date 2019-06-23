@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Form, Input, Button, Row, Col } from 'antd';
+import { Form, Input, Button, Row, Col, message } from 'antd';
 import Axios from 'axios';
 
 class EditClassForm extends Component {
@@ -13,16 +13,21 @@ class EditClassForm extends Component {
         console.log(err);
         return;
       }
-
-      Axios.put(`/lop/${this.state.id}`, value.name).then(res => {
-        console.log(res);
-      });
+      console.log(value.name, 'value name');
+      Axios.put(`/lop/${this.state.lop.id}`, { name: value.name })
+        .then(res => {
+          console.log(res);
+          message.success('Success');
+        })
+        .catch(err => message.error(err.message));
     });
   };
 
   async componentDidMount() {
     const resLop = await Axios.get(`/lop/${this.props.id}`);
+    console.log(resLop);
     this.props.form.setFieldsValue({
+      id: resLop.data.id,
       name: resLop.data.name,
     });
     this.setState({ lop: resLop.data });
@@ -33,8 +38,16 @@ class EditClassForm extends Component {
       <div className="form">
         {true ? (
           <Row type="flex" justify="center">
-            <Col>
+            <Col span={8}>
               <Form onSubmit={this.handleEdit} layout="vertical">
+                {/* id */}
+                <Form.Item label="ID">
+                  {form.getFieldDecorator('id', {
+                    rules: [
+                      { required: true, message: 'Please input this field!' },
+                    ],
+                  })(<Input disabled />)}
+                </Form.Item>
                 {/* name */}
                 <Form.Item label="Class Name">
                   {form.getFieldDecorator('name', {

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Form, Input, Button, Row, Col, Select } from 'antd';
+import { Form, Input, Button, Row, Col, Select, message } from 'antd';
 import Axios from 'axios';
 const Option = Select.Option;
 
@@ -27,9 +27,12 @@ class EditStudentForm extends Component {
         //   chemistry: value.chemistry,
         // },
       };
-      Axios.put(`/student/${studentEdited.id}`, studentEdited).then(res => {
-        console.log(res);
-      });
+      Axios.put(`/student/${studentEdited.id}`, studentEdited)
+        .then(res => {
+          console.log(res);
+          message.success('Success');
+        })
+        .catch(err => message.error(err.message));
     });
   };
 
@@ -54,7 +57,7 @@ class EditStudentForm extends Component {
       <div className="form">
         {true ? (
           <Row type="flex" justify="center">
-            <Col>
+            <Col span={8}>
               <Form onSubmit={this.handleEdit} layout="vertical">
                 {/* id */}
                 <Form.Item label="Student Id">

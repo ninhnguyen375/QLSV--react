@@ -3,26 +3,40 @@ import Main from '../layouts/Main';
 import { Button, Divider } from 'antd';
 import { Modal, Icon } from 'antd';
 import AddStudentForm from '../components/Formbase/AddStudentForm';
-import ImportFromExel from '../components/Formbase/ImportFromExel';
 import EditStudentForm from '../components/Formbase/EditStudentForm';
+import { Link } from 'react-router-dom';
 import TableStudent from '../components/TableBase/TableStudent';
 import Axios from 'axios';
+import ExportTableStudentToExcel from '../components/ExportToExcelBase/ExportTableStudentToExcel';
 
 class Student extends Component {
   state = {
     isAddStudentFormOpen: false,
     isEditStudentFormOpen: false,
     dataSource: [],
+    currentEditId: '',
   };
 
   toggleBoolean = stateKey => {
     this.setState({ [stateKey]: !this.state[stateKey] });
   };
 
-  async componentDidMount() {
+  getData = async () => {
     const res = await Axios.get('/student');
     this.setState({ ...this.state, dataSource: res.data });
+  };
+
+  async componentDidMount() {
+    await this.getData();
   }
+
+  handleOpenEdit = id => {
+    this.setState({
+      ...this.state,
+      currentEditId: id,
+      isEditStudentFormOpen: true,
+    });
+  };
 
   render() {
     const { isAddStudentFormOpen, isEditStudentFormOpen } = this.state;
@@ -45,10 +59,17 @@ class Student extends Component {
           footer={null}
           style={{ top: 10 }}
         >
-          <AddStudentForm />
+          <AddStudentForm
+            getData={this.getData}
+            toggleModal={() => this.toggleBoolean('isAddStudentFormOpen')}
+          />
         </Modal>
         {/* Import from excel */}
-        <ImportFromExel />
+        <Link to="/importfromexcel">
+          <Button type="primary" ghost={true}>
+            <Icon type="file-excel" /> Import Form Excel
+          </Button>
+        </Link>
         {/* Edit student */}
         <Modal
           title="EDIT STUDENT"
@@ -63,10 +84,15 @@ class Student extends Component {
         <Divider />
         {this.state.dataSource && this.state.dataSource[0] && (
           <TableStudent
+            getData={this.getData}
+            handleOpenEdit={this.handleOpenEdit}
             toggleEdit={() => this.toggleBoolean('isEditStudentFormOpen')}
             dataSource={this.state.dataSource}
           />
         )}
+        {/* export from excel */}
+
+        <ExportTableStudentToExcel dataSource={this.state.dataSource} />
       </Main>
     );
   }

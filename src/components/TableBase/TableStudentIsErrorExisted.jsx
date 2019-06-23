@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import Axios from 'axios';
-import { Table, Button, Icon, Popconfirm } from 'antd';
+import { Table, Button, Icon, message } from 'antd';
 
-export default class TableStudent extends Component {
+export default class TableStudentIsErrorExisted extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -57,27 +57,13 @@ export default class TableStudent extends Component {
           title: 'Chức năng',
           render: (text, record) => (
             <div style={{ display: 'flex', justifyContent: 'center' }}>
-              <Popconfirm
-                placement="topRight"
-                title={'Are you sure?'}
-                onConfirm={() => this.handleDelete(record.id)}
-                okText="Yes"
-                cancelText="No"
+              <Button
+                onClick={() => this.handleOveride(record.id)}
+                style={{ marginRight: '10px' }}
+                type="danger"
               >
-                <Button style={{ marginRight: '10px' }} type="danger">
-                  <Icon type="delete" theme="filled" /> Remove
-                </Button>
-              </Popconfirm>
-
-              <Link to={`/editstudent/${record.id}`}>
-                <Button
-                  // onClick={() => this.props.handleOpenEdit(record.id)}
-                  // size={'large'}
-                  type="primary"
-                >
-                  <Icon type="edit" theme="filled" /> Edit
-                </Button>
-              </Link>
+                Overide
+              </Button>
             </div>
           ),
         },
@@ -85,12 +71,13 @@ export default class TableStudent extends Component {
     };
   }
 
-  handleDelete = async id => {
-    await Axios({
-      url: `/student/${id}`, // http://localhost:5050/student/:id,
-      method: 'DELETE',
-    });
-    this.props.getData();
+  handleOveride = id => {
+    Axios.put(`/student/${id}`, this.props.dataSource.find(i => i.id === id))
+      .then(() => {
+        message.success('Success');
+      })
+      .catch(err => message.error(err.message));
+    // this.props.getData();
   };
   render() {
     const { conlumns } = this.state;

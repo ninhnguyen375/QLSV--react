@@ -1,12 +1,12 @@
 let ObjectSchema = {
-  id: "",
-  fname: "",
-  school_class_id: "",
-  school_class_name: "",
-  lname: "",
-  chemistry: "",
-  math: "",
-  physical: ""
+  id: '',
+  fname: '',
+  lname: '',
+  SchoolClassId: '',
+  SchoolClassName: '',
+  // chemistry: "",
+  // math: "",
+  // physical: ""
 };
 
 let checkUnique = obj => {
@@ -31,7 +31,7 @@ const checkUniqueArr = arr => {
     else incorrectArr.push(arr[i]);
   return {
     correctArr,
-    incorrectArr
+    incorrectArr,
   };
 };
 
@@ -41,16 +41,17 @@ const convertToMyObject = arr => {
     let newObj = {
       id: arr[i].id,
       fname: arr[i].fname,
-      school_class: {
-        id: arr[i].school_class_id,
-        name: arr[i].school_class_name
-      },
       lname: arr[i].lname,
-      scores: {
-        math: arr[i].math,
-        physical: arr[i].physical,
-        chemistry: arr[i].chemistry
-      }
+      SchoolClassId: arr[i].SchoolClassId,
+      SchoolClass: {
+        id: arr[i].SchoolClassId,
+        name: arr[i].SchoolClassName,
+      },
+      // scores: {
+      //   math: arr[i].math,
+      //   physical: arr[i].physical,
+      //   chemistry: arr[i].chemistry,
+      // },
     };
     newArr.push(newObj);
   }
@@ -59,5 +60,5 @@ const convertToMyObject = arr => {
 
 export default {
   checkUniqueArr,
-  convertToMyObject
+  convertToMyObject,
 };

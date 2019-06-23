@@ -22,20 +22,25 @@ class Main extends Component {
           <Link to="/">
             <div className="logo">STUDENT MANAGER</div>
           </Link>
-          <Menu theme="dark" mode="inline" defaultSelectedKeys={['4']}>
-            <Menu.Item key="1">
+          {console.log(this.props)}
+          <Menu
+            theme="dark"
+            mode="inline"
+            defaultSelectedKeys={[window.location.pathname]}
+          >
+            <Menu.Item key="/">
               <Link to="/">
                 <Icon type="user" />
                 <span className="nav-text">Students</span>
               </Link>
             </Menu.Item>
-            <Menu.Item key="2">
+            <Menu.Item key="/classview">
               <Link to="/classview">
                 <Icon type="video-camera" />
                 <span className="nav-text">Class</span>
               </Link>
             </Menu.Item>
-            <Menu.Item key="3">
+            <Menu.Item key="/report">
               <Link to="/report">
                 <Icon type="upload" />
                 <span className="nav-text">Report</span>
@@ -48,7 +53,9 @@ class Main extends Component {
             {/* <Icon type="user" /> */}
           </Header>
           <Content style={{ margin: '24px 16px 0' }}>
-            <div style={{ padding: 24, background: '#fff', minHeight: 360 }}>
+            <div
+              style={{ padding: 24, background: '#fff', minHeight: '100vh' }}
+            >
               {this.props.children}
             </div>
           </Content>

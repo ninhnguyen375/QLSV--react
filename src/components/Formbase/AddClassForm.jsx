@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Form, Input, Button, Row, Col } from 'antd';
+import { Form, Input, Button, Row, Col, message } from 'antd';
 import Axios from 'axios';
 
 class AddClassForm extends Component {
@@ -22,16 +22,19 @@ class AddClassForm extends Component {
         name: value.name,
       };
       console.log(newClass);
-      // Axios.post(`/student`, newStudent).then(res => {
-      //   console.log(res);
-      // });
+      Axios.post(`/lop`, newClass).then(res => {
+        console.log(res);
+        message.success('Success');
+        this.props.getData();
+        this.props.toggleModal();
+      });
     });
   };
   render() {
     const { form } = this.props;
     return (
       <div className="form">
-        <Row type="flex" justify="center">
+        <Row>
           <Col>
             <Form onSubmit={this.handleAdd} layout="vertical">
               {/* name */}

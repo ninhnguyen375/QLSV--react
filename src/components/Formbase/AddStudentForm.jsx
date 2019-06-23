@@ -1,52 +1,75 @@
 import React, { Component } from 'react';
-import { Form, Input, Button, Row, Col, Select } from 'antd';
+import { Form, Input, Button, Row, Col, Select, message } from 'antd';
 import Axios from 'axios';
 
 class AddStudentForm extends Component {
   state = {
     lop: [],
+    isDuplicateId: false,
   };
 
+  checkDuplicateId = async id => {
+    try {
+      await Axios.get(`/student/${id}`);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  };
   async componentDidMount() {
     const resLop = await Axios.get(`/lop`);
     this.setState({ lop: resLop.data });
   }
   handleAdd = e => {
     e.preventDefault();
-    this.props.form.validateFields((err, value) => {
+    this.props.form.validateFields(async (err, value) => {
       if (err) {
         console.log(err);
+        return;
+      }
+      const isDup = await this.checkDuplicateId(value.id);
+      if (isDup) {
+        message.error('This id has been used');
         return;
       }
       const newStudent = {
         id: value.id,
         fname: value.fname,
         lname: value.lname,
-        lop: this.state.lop.find(item => item.id === value.lop),
-        scores: {
-          math: value.math,
-          physical: value.physical,
-          chemistry: value.chemistry,
-        },
+        SchoolClass: this.state.lop.find(item => item.id === value.lop),
+        SchoolClassId: value.lop,
+        // scores: {
+        //   math: value.math,
+        //   physical: value.physical,
+        //   chemistry: value.chemistry,
+        // },
       };
       console.log(newStudent);
-      // Axios.post(`/student`, newStudent).then(res => {
-      //   console.log(res);
-      // });
+      await Axios.post(`/student`, newStudent)
+        .then(res => {
+          message.success('Success');
+          this.props.getData();
+          this.props.toggleModal();
+          console.log(res);
+        })
+        .catch(err => message.error(err.message));
     });
   };
   render() {
     const { form } = this.props;
     return (
       <div className="form">
-        <Row type="flex" justify="center">
+        <Row>
           <Col>
             <Form onSubmit={this.handleAdd} layout="vertical">
               {/* id */}
               <Form.Item label="Student Id">
                 {form.getFieldDecorator('id', {
                   rules: [
-                    { required: true, message: 'Please input this field!' },
+                    {
+                      required: true,
+                      message: 'Please input this field!',
+                    },
                   ],
                 })(<Input />)}
               </Form.Item>
@@ -82,39 +105,6 @@ class AddStudentForm extends Component {
                   </Select>,
                 )}
               </Form.Item>
-              <div>Scores</div>
-              <Row type="flex" justify="space-around">
-                {/* math */}
-                <Col span={7}>
-                  <Form.Item label="Math">
-                    {form.getFieldDecorator('math', {
-                      rules: [
-                        { required: true, message: 'Please input this field!' },
-                      ],
-                    })(<Input type="number" />)}
-                  </Form.Item>
-                </Col>
-                {/* physical */}
-                <Col span={7}>
-                  <Form.Item label="Physical">
-                    {form.getFieldDecorator('physical', {
-                      rules: [
-                        { required: true, message: 'Please input this field!' },
-                      ],
-                    })(<Input type="number" />)}
-                  </Form.Item>
-                </Col>
-                {/* chemistry */}
-                <Col span={7}>
-                  <Form.Item label="Chemistry">
-                    {form.getFieldDecorator('chemistry', {
-                      rules: [
-                        { required: true, message: 'Please input this field!' },
-                      ],
-                    })(<Input type="number" />)}
-                  </Form.Item>
-                </Col>
-              </Row>
 
               <Button htmlType="submit" type="primary">
                 ADD
@@ -130,3 +120,36 @@ class AddStudentForm extends Component {
 AddStudentForm.propTypes = {};
 
 export default Form.create({ name: 'add-student-form' })(AddStudentForm);
+//<div>Scores</div>;
+// <Row type="flex" justify="space-around">
+//   {/* math */}
+//   <Col span={7}>
+//     <Form.Item label="Math">
+//       {form.getFieldDecorator('math', {
+//         rules: [
+//           { required: true, message: 'Please input this field!' },
+//         ],
+//       })(<Input type="number" />)}
+//     </Form.Item>
+//   </Col>
+//   {/* physical */}
+//   <Col span={7}>
+//     <Form.Item label="Physical">
+//       {form.getFieldDecorator('physical', {
+//         rules: [
+//           { required: true, message: 'Please input this field!' },
+//         ],
+//       })(<Input type="number" />)}
+//     </Form.Item>
+//   </Col>
+//   {/* chemistry */}
+//   <Col span={7}>
+//     <Form.Item label="Chemistry">
+//       {form.getFieldDecorator('chemistry', {
+//         rules: [
+//           { required: true, message: 'Please input this field!' },
+//         ],
+//       })(<Input type="number" />)}
+//     </Form.Item>
+//   </Col>
+// </Row>

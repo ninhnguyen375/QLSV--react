@@ -1,17 +1,30 @@
 import React, { Component } from 'react';
 import Axios from 'axios';
-import { Button, Row, Col } from 'antd';
+import { Button, Row, Col, Divider, message } from 'antd';
 import code from '../code/code';
 import TableStudentIncorrect from '../components/TableBase/TableStudentIncorrect';
-import ExportTableStudentToExcel from '../components/TableBase/ExportTableStudentToExcel';
+import ExportTableStudentToExcel from '../components/ExportToExcelBase/ExportTableStudentToExcel';
 import TableStudent from '../components/TableBase/TableStudent';
+import Main from '../layouts/Main';
+import TableStudentIsErrorExisted from '../components/TableBase/TableStudentIsErrorExisted';
+
+const addNewStudent = async student => {
+  await Axios.post(`/student`, student)
+    .then(res => {
+      message.success('Success');
+      console.log(res);
+    })
+    .catch(err => message.error(err.message));
+};
 
 export default class ImportFromExcel extends Component {
   state = {
     dataSource: [],
     dataSourceIncorrect: [],
+    dataSourceIsExisted: [],
     file: null,
   };
+
   handleClick = async e => {
     let form = new FormData();
     form.append('sv_file', this.state.file);
@@ -20,29 +33,62 @@ export default class ImportFromExcel extends Component {
         'content-type': 'multipart/form-data',
       },
     };
-    //lấy dữ liệu api về
+
     let res = await Axios.post('http://localhost:5000/upload', form, option);
-    // dataSource chỉnh sửa lại api cho phù hợp lấy những thằng phù hợp hiện lên table
+
+    // convert obj xlsx to student obj
     let dataSource = code.convertToMyObject(
       code.checkUniqueArr(res.data).correctArr,
     );
+
     let dataSourceIncorrect = code.convertToMyObject(
       code.checkUniqueArr(res.data).incorrectArr,
     );
+
+    // Check exist
+    const students = await Axios.get('/student');
+    let dataSourceIsExisted = dataSource.filter(item =>
+      students.data.find(s => s.id === item.id),
+    );
+
+    dataSource = dataSource.filter(
+      item => !students.data.find(s => s.id === item.id),
+    );
+
+    await this.addAllCorrect(dataSource);
+
     this.setState({
       dataSource,
+      dataSourceIsExisted,
       dataSourceIncorrect,
     });
   };
+
+  addAllCorrect = async data => {
+    // import valid student to db
+    console.log(data);
+    let promises = [];
+    for (let i = 0; i < data.length; i++) {
+      const student = data[i];
+      promises.push(addNewStudent(student));
+    }
+    await Promise.all(promises);
+  };
+
   handleChange = e => {
     this.setState({
       file: e.target.files[0],
     });
   };
+
   render() {
-    const { dataSource, dataSourceIncorrect } = this.state;
+    const { dataSource, dataSourceIncorrect, dataSourceIsExisted } = this.state;
     return (
-      <div>
+      <Main>
+        <h1 style={{ fontSize: '2em', color: 'gray' }}>
+          Import Student From Excel File
+        </h1>
+        <Divider />
         <Row>
           <Col sm={24}>
             <form id="form">
@@ -51,18 +97,33 @@ export default class ImportFromExcel extends Component {
                 Import Excel
               </Button>
             </form>
-            <ExportTableStudentToExcel dataSource={dataSource} />
           </Col>
         </Row>
+        <Divider />
         <Row>
-          <Col sm={24} lg={12}>
-            <TableStudent dataSource={dataSource} />
-          </Col>
-          <Col sm={24} lg={12}>
-            <TableStudentIncorrect dataSource={dataSourceIncorrect} />
-          </Col>
+          <h1 style={{ fontSize: '2em', color: 'gray' }}>Import Success</h1>
+          <ExportTableStudentToExcel dataSource={dataSource} />
+
+          <Divider />
+          <TableStudent dataSource={dataSource} />
         </Row>
-      </div>
+        <Divider />
+        <Row>
+          <h1 style={{ fontSize: '2em', color: 'gray' }}>
+            Import Errors - Missing Some Fields
+          </h1>
+          <Divider />
+          <TableStudentIncorrect dataSource={dataSourceIncorrect} />
+        </Row>
+        <Divider />
+        <Row>
+          <h1 style={{ fontSize: '2em', color: 'gray' }}>
+            Import Errors - Existed From Database
+          </h1>
+          <Divider />
+          <TableStudentIsErrorExisted dataSource={dataSourceIsExisted} />
+        </Row>
+      </Main>
     );
   }
   // async componentDidMount() {
